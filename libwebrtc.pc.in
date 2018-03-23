@@ -1,0 +1,12 @@
+prefix=/usr
+exec_prefix=${prefix}
+libdir=${prefix}/lib
+includedir=${prefix}/include
+
+Name: libwebrtc
+Description: The WebRTC library
+Requires: x11
+Version: ${VERSION}.0.0
+Libs: -L${libdir}/lib -lwebrtc_full${INSTALL_SUFFIX}
+Cflags: -std=gnu++11 -fno-rtti -DWEBRTC_POSIX -I${includedir}/webrtc -I${includedir}/webrtc/third_party/libyuv/include -I${includedir}/webrtc/third_party/jsoncpp/source/include -I${includedir}/webrtc/third_party/boringssl/src/include ${DEBUG_OPT}
+Libs.private: -lpthread -ldl

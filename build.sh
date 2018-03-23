@@ -1,30 +1,20 @@
 #!/bin/sh
-VERSION=66
-COMMIT=
-if [ -d webrtc ]; then
-    git -C webrtc/src reset --hard
-    git -C webrtc/src clean -xdf
-    git -C webrtc/src checkout branch-heads/$VERSION
-    make sync all
-fi
+VERSION=${VERSION:=66}
+echo TYPE=${TYPE} VERSION=${VERSION} OUTPUT=${OUTPUT}
+make TYPE=${TYPE} VERSION=${VERSION}
+COMMIT=$(git -C webrtc/src rev-parse --short HEAD)
 checkinstall \
     -y \
     --install=no \
     --fstrans=yes \
     --maintainer=otamachan@gmail.com \
-    --pkgname=libwebrtc-dev \
-    --pkgversion=$VERSION.0.0 \
+    --pkgname=libwebrtc$(if [ "${TYPE}" = "Debug" ]; then echo _debug; fi)-dev \
+    --pkgversion=$VERSION.0.0-${COMMIT} \
     --pkglicense=BSD \
     --deldesc=yes \
-    --backup=no make install TYPE=Release
-checkinstall \
-    -y \
-    --install=no \
-    --fstrans=yes \
-    --maintainer=otamachan@gmail.com \
-    --pkgname=libwebrtc-dev-dbg \
-    --pkgversion=$VERSION.0.0 \
-    --pkglicense=BSD \
-    --deldesc=yes \
-    --backup=no make install
+    --backup=no make install TYPE=${TYPE}
 rm -rf description* doc-pak
+if [ -n "${OUTPUT}" ]; then
+    cp *.deb ${OUTPUT}
+fi
+ls ${OUTPUT}
