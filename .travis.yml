@@ -1,0 +1,8 @@
+sudo: true
+dist: xenial
+language: generic
+install:
+  - sudo apt-get -qq update
+  - sudo apt-get install -y build-essential checkinstall git python-minimal wget
+script:
+  - ./build.sh
