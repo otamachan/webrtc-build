@@ -1,15 +1,16 @@
 sudo: required
 language: generic
 env:
-- TYPE=Debug VERSION=66
-- TYPE=Release VERSION=65
-- TYPE=Release VERSION=66
+- TARGET_CPU=x64 TYPE=Debug VERSION=66
+- TARGET_CPU=x64 TYPE=Release VERSION=65
+- TARGET_CPU=x64 TYPE=Release VERSION=66
+- TARGET_CPU=arm64 TYPE=Release VERSION=66
 services:
 - docker
 script:
 - docker build -t builder .
 - mkdir output
-- docker run --volume $(pwd)/output:/output --env TYPE=${TYPE} --env VERSION=${VERSION} --env OUTPUT=/output builder
+- docker run --volume $(pwd)/output:/output --env TARGET_CPU=${TARGET_CPU} --env TYPE=${TYPE} --env VERSION=${VERSION} --env OUTPUT=/output builder
 deploy:
   provider: releases
   skip_cleanup: true

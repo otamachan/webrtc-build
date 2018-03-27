@@ -1,10 +1,10 @@
 WEBRTCDIR:=webrtc
 FETCH_OPTION:=
+TARGET_CPU:=x64
 TYPE:=Debug
 VERSION:=66
-TAGET_CPU:=x86_64
 SRCDIR:=$(WEBRTCDIR)/src
-TARGET:=out/$(TAGET_CPU)/$(TYPE)
+TARGET:=out/$(TARGET_CPU)/$(TYPE)
 OUTDIR:=$(SRCDIR)/$(TARGET)
 OBJDIR:=$(SRCDIR)/$(TARGET)/obj
 DESTDIR:=/usr
@@ -23,7 +23,7 @@ INSTALL_SUFFIX:=
 DEBUG_OPT:=
 endif
 
-GNARGSCOMMON:=is_clang=false rtc_include_tests=false use_custom_libcxx=false treat_warnings_as_errors=false rtc_use_h264=true ffmpeg_branding="Chrome"
+GNARGSCOMMON:=target_cpu="$(TARGET_CPU)" is_clang=false rtc_include_tests=false use_custom_libcxx=false treat_warnings_as_errors=false rtc_use_h264=true ffmpeg_branding="Chrome"
 
 all: libwebrtc
 
@@ -36,6 +36,7 @@ $(SRCDIR)/DEPS: depot_tools/gclient
 	cd $(SRCDIR) && git checkout branch-heads/$(VERSION)
 	sed -i -e "s|'src/resources'],|'src/resources'],'condition':'rtc_include_tests==true',|" $(SRCDIR)/DEPS
 	cd $(SRCDIR) && gclient sync --with_branch_heads
+	if [ "$(TARGET_CPU)" = "arm64" ]; then cd $(SRCDIR) && build/linux/sysroot_scripts/install-sysroot.py --arch=arm64 ;fi
 
 $(OUTDIR)/build.ninja: $(SRCDIR)/DEPS
 	cd $(SRCDIR) && gn gen $(TARGET) --args='$(GNARGSCOMMON) $(GNARGS)'
