@@ -11,6 +11,7 @@ checkinstall \
     --pkgname=libwebrtc$(if [ "${TYPE}" = "Debug" ]; then echo _debug; fi)-dev \
     --pkgversion=$VERSION.0.0-${COMMIT} \
     --pkglicense=BSD \
+    --requires="libx11-dev" \
     --deldesc=yes \
     --backup=no make install TYPE=${TYPE}
 rm -rf description* doc-pak
