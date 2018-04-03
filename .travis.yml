@@ -10,7 +10,7 @@ services:
 script:
 - docker build -t builder .
 - mkdir output
-- docker run --volume $(pwd)/output:/output --env TARGET_CPU=${TARGET_CPU} --env TYPE=${TYPE} --env VERSION=${VERSION} --env OUTPUT=/output builder
+- docker run --volume $(pwd)/output:/output --env TARGET_CPU=${TARGET_CPU} --env TYPE=${TYPE} --env VERSION=${VERSION} --env BUILD=$(git describe) --env OUTPUT=/output builder
 deploy:
   provider: releases
   skip_cleanup: true

@@ -2,9 +2,9 @@
 set -xe
 VERSION=${VERSION:=66}
 TARGET_CPU=${TARGET_CPU:=x64}
-echo TARGET_CPU=${TARGET_CPU} TYPE=${TYPE} VERSION=${VERSION} OUTPUT=${OUTPUT}
+echo TARGET_CPU=${TARGET_CPU} TYPE=${TYPE} VERSION=${VERSION} BUILD=${BUILD} OUTPUT=${OUTPUT}
 make TARGET_CPU=${TARGET_CPU} TYPE=${TYPE} VERSION=${VERSION}
-COMMIT=$(git -C webrtc/src rev-parse --short HEAD)
+WEBRTC_COMMIT=$(git -C webrtc/src rev-parse --short HEAD)
 ARCH=${TARGET_CPU}
 if [ "${ARCH}" = "x64" ]; then ARCH=amd64; fi
 checkinstall \
@@ -14,7 +14,7 @@ checkinstall \
     --maintainer=otamachan@gmail.com \
     --arch=${ARCH} \
     --pkgname=libwebrtc$(if [ "${TYPE}" = "Debug" ]; then echo _debug; fi)-dev \
-    --pkgversion=$VERSION.0.0-${COMMIT} \
+    --pkgversion=$VERSION.0.${BUILD}-${WEBRTC_COMMIT} \
     --pkglicense=BSD \
     --requires="libx11-dev" \
     --deldesc=yes \
