@@ -1,10 +1,9 @@
 sudo: required
 language: generic
 env:
-- TARGET_CPU=x64 TYPE=Debug VERSION=66
-- TARGET_CPU=x64 TYPE=Release VERSION=65
-- TARGET_CPU=x64 TYPE=Release VERSION=66
-- TARGET_CPU=arm64 TYPE=Release VERSION=66
+#- TARGET_CPU=x64 TYPE=Debug VERSION=67
+- TARGET_CPU=x64 TYPE=Release VERSION=67
+- TARGET_CPU=arm64 TYPE=Release VERSION=67
 services:
 - docker
 script:
