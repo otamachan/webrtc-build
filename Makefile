@@ -8,6 +8,8 @@ TARGET:=out/$(TARGET_CPU)/$(TYPE)
 OUTDIR:=$(SRCDIR)/$(TARGET)
 OBJDIR:=$(SRCDIR)/$(TARGET)/obj
 DESTDIR:=/usr
+# https://bugs.chromium.org/p/webrtc/issues/detail?id=9528
+PATCHES_FOR_69=06f66c72600e58438ba9caf9f523e00a519ef3c0 12912255424a293397270c7b50fb56e82ecad4ea
 
 LIBNAME=libwebrtc_full$(INSTALL_SUFFIX)
 
@@ -34,6 +36,8 @@ $(SRCDIR)/DEPS: depot_tools/gclient
 	mkdir -p $(WEBRTCDIR)
 	cd $(WEBRTCDIR) && fetch --nohooks webrtc
 	cd $(SRCDIR) && git checkout branch-heads/$(VERSION)
+	git -C $(SRCDIR) config user.email "you@example.com"; git -C $(SRCDIR) config user.name "Your Name"
+	PATCHES="$(PATCHES_FOR_$(VERSION))"; for p in $$PATCHES; do git -C $(SRCDIR) cherry-pick "$$p"; done  # apply patches
 	sed -i -e "s|'src/resources'],|'src/resources'],'condition':'rtc_include_tests==true',|" $(SRCDIR)/DEPS
 	cd $(SRCDIR) && gclient sync --with_branch_heads
 	if [ "$(TARGET_CPU)" = "arm64" ]; then cd $(SRCDIR) && build/linux/sysroot_scripts/install-sysroot.py --arch=arm64 ;fi
