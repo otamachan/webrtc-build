@@ -23,7 +23,7 @@ INSTALL_SUFFIX:=
 DEBUG_OPT:=
 endif
 
-GNARGSCOMMON:=target_cpu="$(TARGET_CPU)" is_clang=false rtc_include_tests=false use_custom_libcxx=false treat_warnings_as_errors=false rtc_use_h264=true ffmpeg_branding="Chrome"
+GNARGSCOMMON:=target_cpu="$(TARGET_CPU)" use_custom_libcxx=false rtc_include_tests=false treat_warnings_as_errors=false rtc_use_h264=true ffmpeg_branding="Chrome"
 
 all: libwebrtc
 
@@ -58,20 +58,8 @@ OBJS:=rtc_base/rtc_json/json third_party/jsoncpp/jsoncpp/json_reader third_party
 
 libwebrtc: $(OBJDIR)/$(LIBNAME).a
 
-define AR_SCRIPT
-create $(OBJDIR)/$(LIBNAME).a
-addlib $(OBJDIR)/libwebrtc.a
-addlib $(OBJDIR)/libwebrtc_common.a
-save
-end
-endef
-export AR_SCRIPT
-
 $(OBJDIR)/$(LIBNAME).a: $(OUTDIR)/build.ninja
 	cd $(SRCDIR) && ninja -C $(TARGET) webrtc rtc_json jsoncpp
-	echo "$$AR_SCRIPT" > /tmp/$(LIBNAME).mri
-	ar -M < /tmp/$(LIBNAME).mri
-	rm /tmp/$(LIBNAME).mri
 	ar rcs $@ $(addprefix $(OBJDIR)/,$(addsuffix .o,$(OBJS)))
 	ranlib $@
 

@@ -3,7 +3,6 @@ RUN apt-get update \
     && apt-get install -y \
        build-essential \
        checkinstall \
-       gcc-aarch64-linux-gnu g++-aarch64-linux-gnu \
        gettext \
        git \
        pkg-config \
