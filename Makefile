@@ -2,7 +2,7 @@ WEBRTCDIR:=webrtc
 FETCH_OPTION:=
 TARGET_CPU:=x64
 TYPE:=Debug
-VERSION:=66
+VERSION:=69
 SRCDIR:=$(WEBRTCDIR)/src
 TARGET:=out/$(TARGET_CPU)/$(TYPE)
 OUTDIR:=$(SRCDIR)/$(TARGET)
@@ -60,6 +60,7 @@ libwebrtc: $(OBJDIR)/$(LIBNAME).a
 
 $(OBJDIR)/$(LIBNAME).a: $(OUTDIR)/build.ninja
 	cd $(SRCDIR) && ninja -C $(TARGET) webrtc rtc_json jsoncpp
+	cp $(OBJDIR)/libwebrtc.a $@
 	ar rcs $@ $(addprefix $(OBJDIR)/,$(addsuffix .o,$(OBJS)))
 	ranlib $@
 
@@ -75,6 +76,6 @@ install: $(OBJDIR)/$(LIBNAME).a
 		find $$base -name '*.h' -exec install -D '{}' '$(DESTDIR)/include/webrtc$(INSTALL_SUFFIX)/{}' ';'; \
 	done
 	cd $(SRCDIR) && find third_party -name '*.h' -o -name README -o -name LICENSE -o -name COPYING | \
-	    grep -E 'third_party/(boringssl|expat/files|jsoncpp|libjpeg|libjpeg_turbo|libsrtp|libyuv|libvpx|opus|protobuf|usrsctp/usrsctpout/usrsctpout)' | \
+	    grep -E 'third_party/(abseil-cpp|boringssl|expat/files|jsoncpp|libjpeg|libjpeg_turbo|libsrtp|libyuv|libvpx|opus|protobuf|usrsctp/usrsctpout/usrsctpout)' | \
 	    grep -v /third_party | \
 	    xargs -I '{}' install -D '{}' '$(DESTDIR)/include/webrtc$(INSTALL_SUFFIX)/{}'
