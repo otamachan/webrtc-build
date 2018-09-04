@@ -67,6 +67,8 @@ $(OBJDIR)/$(LIBNAME).a: $(OUTDIR)/build.ninja
 	cp $(OBJDIR)/libwebrtc.a $@
 	ar rcs $@ $(addprefix $(OBJDIR)/,$(addsuffix .o,$(OBJS)))
 	ranlib $@
+	nm $@ | grep -E " [Td] av" | awk '{print $$3 " _" $$3}' > /tmp/ffmpeg.syms  # rename ffmpeg symbols to strip those symbols
+	objcopy --redefine-syms /tmp/ffmpeg.syms $@
 
 example: $(OUTDIR)/.dirstamp
 	cd $(SRCDIR) && ninja -C $(TARGET) examples
