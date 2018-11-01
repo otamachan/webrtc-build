@@ -25,6 +25,18 @@ INSTALL_SUFFIX:=
 DEBUG_OPT:=
 endif
 
+ifeq ($(TARGET_CPU),x64)
+AR=ar
+RANLIB=ranlib
+NM=nm
+OBJCOPY=objcopy
+else ifeq ($(TARGET_CPU),arm64)
+AR=aarch64-linux-gnu-ar
+RANLIB=aarch64-linux-gnu-ranlib
+NM=aarch64-linux-gnu-nm
+OBJCOPY=aarch64-linux-gnu-objcopy
+endif
+
 GNARGSCOMMON:=target_cpu="$(TARGET_CPU)" use_custom_libcxx=false rtc_include_tests=false treat_warnings_as_errors=false rtc_use_h264=true ffmpeg_branding="Chrome"
 
 all: libwebrtc
@@ -65,10 +77,10 @@ libwebrtc: $(OBJDIR)/$(LIBNAME).a
 $(OBJDIR)/$(LIBNAME).a: $(OUTDIR)/build.ninja
 	cd $(SRCDIR) && ninja -C $(TARGET) webrtc rtc_json jsoncpp
 	cp $(OBJDIR)/libwebrtc.a $@
-	ar rcs $@ $(addprefix $(OBJDIR)/,$(addsuffix .o,$(OBJS)))
-	ranlib $@
-	nm $@ | grep -E " [Td] av" | awk '{print $$3 " _" $$3}' > /tmp/ffmpeg.syms  # rename ffmpeg symbols to strip those symbols
-	objcopy --redefine-syms /tmp/ffmpeg.syms $@
+	$(AR) rcs $@ $(addprefix $(OBJDIR)/,$(addsuffix .o,$(OBJS)))
+	$(RANLIB) $@
+	$(NM) $@ | grep -E " [Td] av" | awk '{print $$3 " _" $$3}' > /tmp/ffmpeg.syms  # rename ffmpeg symbols to strip those symbols
+	$(OBJCOPY) --redefine-syms /tmp/ffmpeg.syms $@
 
 example: $(OUTDIR)/.dirstamp
 	cd $(SRCDIR) && ninja -C $(TARGET) examples
