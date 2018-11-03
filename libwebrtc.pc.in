@@ -8,4 +8,4 @@ Description: The WebRTC library
 Requires: x11
 Version: ${VERSION}.0.0
 Libs: -L${libdir}/lib -lwebrtc_full${INSTALL_SUFFIX} -lpthread -ldl
-Cflags: -std=gnu++11 -fno-rtti -DWEBRTC_POSIX -I${includedir}/webrtc -I${includedir}/webrtc/third_party/libyuv/include -I${includedir}/webrtc/third_party/jsoncpp/source/include -I${includedir}/webrtc/third_party/boringssl/src/include -I${includedir}/webrtc/third_party/abseil-cpp ${DEBUG_OPT}
+Cflags: -std=gnu++11 -fno-rtti -DWEBRTC_POSIX -I${includedir}/webrtc -I${includedir}/webrtc/third_party/libyuv/include -I${includedir}/webrtc/third_party/jsoncpp/source/include -I${includedir}/webrtc/third_party/boringssl/src/include -I${includedir}/webrtc/third_party/abseil-cpp ${DEBUG_OPT} -DWEBRTC_VERSION=${VERSION}
