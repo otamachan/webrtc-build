@@ -74,9 +74,24 @@ OBJS:=rtc_base/rtc_json/json third_party/jsoncpp/jsoncpp/json_reader third_party
 
 libwebrtc: $(OBJDIR)/$(LIBNAME).a
 
+define AR_SCRIPT
+create $(OBJDIR)/$(LIBNAME).a
+addlib $(OBJDIR)/libwebrtc.a
+addlib $(OBJDIR)/api/video_codecs/libbuiltin_video_decoder_factory.a
+addlib $(OBJDIR)/api/video_codecs/libbuiltin_video_encoder_factory.a
+addlib $(OBJDIR)/pc/libpeerconnection.a
+addlib $(OBJDIR)/pc/libcreate_pc_factory.a
+addlib $(OBJDIR)/modules/congestion_controller/bbr/libbbr.a
+save
+end
+endef
+export AR_SCRIPT
+
 $(OBJDIR)/$(LIBNAME).a: $(OUTDIR)/build.ninja
-	cd $(SRCDIR) && ninja -C $(TARGET) webrtc rtc_json jsoncpp
-	cp $(OBJDIR)/libwebrtc.a $@
+	cd $(SRCDIR) && ninja -C $(TARGET) webrtc rtc_json jsoncpp builtin_video_decoder_factory builtin_video_encoder_factory create_pc_factory peerconnection bbr
+	echo "$$AR_SCRIPT" > /tmp/$(LIBNAME).mri
+	$(AR) -M < /tmp/$(LIBNAME).mri
+	rm /tmp/$(LIBNAME).mri
 	$(AR) rcs $@ $(addprefix $(OBJDIR)/,$(addsuffix .o,$(OBJS)))
 	$(RANLIB) $@
 	$(NM) $@ | grep -E " [Td] av" | awk '{print $$3 " _" $$3}' > /tmp/ffmpeg.syms  # rename ffmpeg symbols to strip those symbols
