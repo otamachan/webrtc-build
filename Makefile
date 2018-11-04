@@ -1,8 +1,8 @@
 WEBRTCDIR:=webrtc
 FETCH_OPTION:=
 TARGET_CPU:=x64
-TYPE:=Debug
-VERSION:=69
+TYPE:=Release
+VERSION:=71
 SRCDIR:=$(WEBRTCDIR)/src
 TARGET:=out/$(TARGET_CPU)/$(TYPE)
 OUTDIR:=$(SRCDIR)/$(TARGET)
@@ -70,9 +70,15 @@ dstclean:
 clean:
 	rm -f $(OBJDIR)/$(LIBNAME).a
 
-OBJS:=rtc_base/rtc_json/json third_party/jsoncpp/jsoncpp/json_reader third_party/jsoncpp/jsoncpp/json_writer third_party/jsoncpp/jsoncpp/json_value
-
-libwebrtc: $(OBJDIR)/$(LIBNAME).a
+OBJS:=rtc_base/rtc_json/json \
+	third_party/jsoncpp/jsoncpp/json_reader \
+	third_party/jsoncpp/jsoncpp/json_writer \
+	third_party/jsoncpp/jsoncpp/json_value \
+	modules/congestion_controller/bbr/bbr_controller/bbr_network_controller \
+	modules/congestion_controller/bbr/bandwidth_sampler/bandwidth_sampler \
+	modules/congestion_controller/bbr/loss_rate_filter/loss_rate_filter \
+	modules/congestion_controller/bbr/bbr_controller/bbr_network_controller \
+	modules/congestion_controller/bbr/rtt_stats/rtt_stats \
 
 define AR_SCRIPT
 create $(OBJDIR)/$(LIBNAME).a
@@ -82,25 +88,28 @@ addlib $(OBJDIR)/api/video_codecs/libbuiltin_video_encoder_factory.a
 addlib $(OBJDIR)/pc/libpeerconnection.a
 addlib $(OBJDIR)/pc/libcreate_pc_factory.a
 addlib $(OBJDIR)/modules/congestion_controller/bbr/libbbr.a
+addmod $(addprefix $(OBJDIR)/,$(addsuffix .o,$(OBJS)))
 save
 end
 endef
 export AR_SCRIPT
+
+libwebrtc: $(OBJDIR)/$(LIBNAME).a
+
+lib: $(OBJDIR)/$(LIBNAME).a
 
 $(OBJDIR)/$(LIBNAME).a: $(OUTDIR)/build.ninja
 	cd $(SRCDIR) && ninja -C $(TARGET) webrtc rtc_json jsoncpp builtin_video_decoder_factory builtin_video_encoder_factory create_pc_factory peerconnection bbr
 	echo "$$AR_SCRIPT" > /tmp/$(LIBNAME).mri
 	$(AR) -M < /tmp/$(LIBNAME).mri
 	rm /tmp/$(LIBNAME).mri
-	$(AR) rcs $@ $(addprefix $(OBJDIR)/,$(addsuffix .o,$(OBJS)))
-	$(RANLIB) $@
 	$(NM) $@ | grep -E " [Td] av" | awk '{print $$3 " _" $$3}' > /tmp/ffmpeg.syms  # rename ffmpeg symbols to strip those symbols
 	$(OBJCOPY) --redefine-syms /tmp/ffmpeg.syms $@
 
 example: $(OUTDIR)/.dirstamp
 	cd $(SRCDIR) && ninja -C $(TARGET) examples
 
-install: $(OBJDIR)/$(LIBNAME).a
+install: lib
 	install -d $(DESTDIR)/lib $(DESTDIR)/include $(DESTDIR)/include/webrtc$(INSTALL_SUFFIX)
 	install $(OUTDIR)/obj/$(LIBNAME).a $(DESTDIR)/lib
 	INSTALL_SUFFIX=$(INSTALL_SUFFIX) VERSION=$(VERSION) DEBUG_OPT=$(DEBUG_OPT) envsubst '$${INSTALL_SUFFIX} $${VERSION} $${DEBUG_OPT}' < libwebrtc.pc.in > $(DESTDIR)/lib/pkgconfig/libwebrtc$(INSTALL_SUFFIX).pc
