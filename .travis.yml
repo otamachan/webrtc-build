@@ -3,6 +3,7 @@ language: generic
 env:
 - TARGET_CPU=x64 TYPE=Release VERSION=71
 - TARGET_CPU=arm64 TYPE=Release VERSION=71
+- TARGET_CPU=arm TYPE=Release VERSION=71
 services:
 - docker
 script:

@@ -25,16 +25,12 @@ INSTALL_SUFFIX:=
 DEBUG_OPT:=
 endif
 
-ifeq ($(TARGET_CPU),x64)
-AR=ar
-RANLIB=ranlib
-NM=nm
-OBJCOPY=objcopy
-else ifeq ($(TARGET_CPU),arm64)
-AR=aarch64-linux-gnu-ar
-RANLIB=aarch64-linux-gnu-ranlib
-NM=aarch64-linux-gnu-nm
-OBJCOPY=aarch64-linux-gnu-objcopy
+ifeq ($(TARGET_CPU),arm64)
+PREFIX=aarch64-linux-gnu-
+else ifeq ($(TARGET_CPU),arm)
+PREFIX=arm-linux-gnueabihf-
+else ($(TARGET_CPU),x64)
+PREFIX=
 endif
 
 GNARGSCOMMON:=target_cpu="$(TARGET_CPU)" use_custom_libcxx=false rtc_include_tests=false treat_warnings_as_errors=false rtc_use_h264=true ffmpeg_branding="Chrome"
@@ -52,7 +48,7 @@ $(SRCDIR)/DEPS: depot_tools/gclient
 	PATCHES="$(PATCHES_FOR_$(VERSION))"; for p in $$PATCHES; do git -C $(SRCDIR) cherry-pick "$$p"; done  # apply patches
 	sed -i -e "s|'src/resources'],|'src/resources'],'condition':'rtc_include_tests==true',|" $(SRCDIR)/DEPS
 	cd $(SRCDIR) && gclient sync --with_branch_heads
-	if [ "$(TARGET_CPU)" = "arm64" ]; then cd $(SRCDIR) && build/linux/sysroot_scripts/install-sysroot.py --arch=arm64 ;fi
+	if [ ! "$(TARGET_CPU)" = "x64" ]; then cd $(SRCDIR) && build/linux/sysroot_scripts/install-sysroot.py --arch=$(TARGET_CPU) ;fi
 
 $(OUTDIR)/build.ninja: $(SRCDIR)/DEPS
 	cd $(SRCDIR) && gn gen $(TARGET) --args='$(GNARGSCOMMON) $(GNARGS)'
@@ -101,10 +97,10 @@ lib: $(OBJDIR)/$(LIBNAME).a
 $(OBJDIR)/$(LIBNAME).a: $(OUTDIR)/build.ninja
 	cd $(SRCDIR) && ninja -C $(TARGET) webrtc rtc_json jsoncpp builtin_video_decoder_factory builtin_video_encoder_factory create_pc_factory peerconnection bbr
 	echo "$$AR_SCRIPT" > /tmp/$(LIBNAME).mri
-	$(AR) -M < /tmp/$(LIBNAME).mri
+	$(PREFIX)ar -M < /tmp/$(LIBNAME).mri
 	rm /tmp/$(LIBNAME).mri
-	$(NM) $@ | grep -E " [Td] av" | awk '{print $$3 " _" $$3}' > /tmp/ffmpeg.syms  # rename ffmpeg symbols to strip those symbols
-	$(OBJCOPY) --redefine-syms /tmp/ffmpeg.syms $@
+	$(PREFIX)nm $@ | grep -E " [Td] av" | awk '{print $$3 " _" $$3}' > /tmp/ffmpeg.syms  # rename ffmpeg symbols to strip those symbols
+	$(PREFIX)objcopy --redefine-syms /tmp/ffmpeg.syms $@
 
 example: $(OUTDIR)/.dirstamp
 	cd $(SRCDIR) && ninja -C $(TARGET) examples

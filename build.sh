@@ -7,7 +7,8 @@ echo TARGET_CPU=${TARGET_CPU} TYPE=${TYPE} VERSION=${VERSION} BUILD=${BUILD} OUT
 make TARGET_CPU=${TARGET_CPU} TYPE=${TYPE} VERSION=${VERSION}
 WEBRTC_COMMIT=$(git -C webrtc/src rev-parse --short HEAD)
 ARCH=${TARGET_CPU}
-if [ "${ARCH}" = "x64" ]; then ARCH=amd64; fi
+if [ "${TARGET_CPU}" = "x64" ]; then ARCH=amd64; fi
+if [ "${TARGET_CPU}" = "arm" ]; then ARCH=armhf; fi
 checkinstall \
     -y \
     --install=no \
