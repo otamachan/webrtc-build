@@ -13,6 +13,7 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 ADD build.sh /root
 ADD Makefile /root
+ADD patches /root/patches
 ADD libwebrtc.pc.in /root
 WORKDIR /root
 CMD ["/root/build.sh"]
