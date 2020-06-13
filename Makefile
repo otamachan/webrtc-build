@@ -84,7 +84,7 @@ libwebrtc: $(OBJDIR)/$(LIBNAME).a
 lib: $(OBJDIR)/$(LIBNAME).a
 
 $(OBJDIR)/$(LIBNAME).a: $(OUTDIR)/build.ninja
-	cd $(SRCDIR) && ninja -C $(TARGET) webrtc
+	cd $(SRCDIR) && ninja -C $(TARGET) webrtc examples
 	echo "$$AR_SCRIPT" > /tmp/$(LIBNAME).mri
 	$(PREFIX)ar -M < /tmp/$(LIBNAME).mri
 	rm /tmp/$(LIBNAME).mri
