@@ -2,7 +2,7 @@ WEBRTCDIR:=webrtc
 FETCH_OPTION:=
 TARGET_CPU:=x64
 TYPE:=Release
-VERSION:=71
+VERSION:=4147
 SRCDIR:=$(WEBRTCDIR)/src
 TARGET:=out/$(TARGET_CPU)/$(TYPE)
 OUTDIR:=$(SRCDIR)/$(TARGET)
@@ -30,7 +30,7 @@ ifeq ($(TARGET_CPU),arm64)
 PREFIX=aarch64-linux-gnu-
 else ifeq ($(TARGET_CPU),arm)
 PREFIX=arm-linux-gnueabihf-
-else ($(TARGET_CPU),x64)
+else ifeq ($(TARGET_CPU),x64)
 PREFIX=
 endif
 
@@ -67,25 +67,13 @@ dstclean:
 clean:
 	rm -f $(OBJDIR)/$(LIBNAME).a
 
-OBJS:=rtc_base/rtc_json/json \
-	third_party/jsoncpp/jsoncpp/json_reader \
-	third_party/jsoncpp/jsoncpp/json_writer \
-	third_party/jsoncpp/jsoncpp/json_value \
-	modules/congestion_controller/bbr/bbr_controller/bbr_network_controller \
-	modules/congestion_controller/bbr/bandwidth_sampler/bandwidth_sampler \
-	modules/congestion_controller/bbr/loss_rate_filter/loss_rate_filter \
-	modules/congestion_controller/bbr/bbr_controller/bbr_network_controller \
-	modules/congestion_controller/bbr/rtt_stats/rtt_stats \
+OBJS:=test/platform_video_capturer/vcm_capturer \
+      test/video_test_common/test_video_capturer
 
 define AR_SCRIPT
 create $(OBJDIR)/$(LIBNAME).a
-addlib $(OBJDIR)/libwebrtc.a
-addlib $(OBJDIR)/api/video_codecs/libbuiltin_video_decoder_factory.a
-addlib $(OBJDIR)/api/video_codecs/libbuiltin_video_encoder_factory.a
-addlib $(OBJDIR)/pc/libpeerconnection.a
-addlib $(OBJDIR)/pc/libcreate_pc_factory.a
-addlib $(OBJDIR)/modules/congestion_controller/bbr/libbbr.a
 addmod $(addprefix $(OBJDIR)/,$(addsuffix .o,$(OBJS)))
+addlib $(OBJDIR)/libwebrtc.a
 save
 end
 endef
@@ -96,12 +84,12 @@ libwebrtc: $(OBJDIR)/$(LIBNAME).a
 lib: $(OBJDIR)/$(LIBNAME).a
 
 $(OBJDIR)/$(LIBNAME).a: $(OUTDIR)/build.ninja
-	cd $(SRCDIR) && ninja -C $(TARGET) webrtc rtc_json jsoncpp builtin_video_decoder_factory builtin_video_encoder_factory create_pc_factory peerconnection bbr
+	cd $(SRCDIR) && ninja -C $(TARGET) webrtc examples
 	echo "$$AR_SCRIPT" > /tmp/$(LIBNAME).mri
 	$(PREFIX)ar -M < /tmp/$(LIBNAME).mri
 	rm /tmp/$(LIBNAME).mri
-	$(PREFIX)nm $@ | grep -E " [Td] av" | awk '{print $$3 " _" $$3}' > /tmp/ffmpeg.syms  # rename ffmpeg symbols to strip those symbols
-	$(PREFIX)objcopy --redefine-syms /tmp/ffmpeg.syms $@
+#	$(PREFIX)nm $@ | grep -E " [Td] av" | awk '{print $$3 " _" $$3}' > /tmp/ffmpeg.syms  # rename ffmpeg symbols to strip those symbols
+#	$(PREFIX)objcopy --redefine-syms /tmp/ffmpeg.syms $@
 
 example: $(OUTDIR)/.dirstamp
 	cd $(SRCDIR) && ninja -C $(TARGET) examples
